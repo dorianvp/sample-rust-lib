@@ -1,4 +1,4 @@
 [workspace]
 resolver = "3"
 
-members = ["modules/corelib", "modules/arithmetic", "modules/geometry"]
+members = ["crates/corelib", "crates/arithmetic", "crates/geometry"]
