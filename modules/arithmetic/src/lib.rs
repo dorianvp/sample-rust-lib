@@ -1,17 +1,23 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+use corelib::MathError;
+
+pub fn add(lhs: u64, rhs: u64) -> u64 {
+    lhs + rhs
 }
 
-pub fn subtract(left: u64, right: u64) -> u64 {
-    left - right
+pub fn subtract(lhs: u64, rhs: u64) -> u64 {
+    lhs - rhs
 }
 
-pub fn multiply(left: u64, right: u64) -> u64 {
-    left * right
+pub fn multiply(lhs: u64, rhs: u64) -> u64 {
+    lhs * rhs
 }
 
-pub fn divide(left: u64, right: u64) -> u64 {
-    left / right
+pub fn divide(lhs: u64, rhs: u64) -> Result<u64, MathError> {
+    if rhs == 0 {
+        Err(MathError::DivisionByZero)
+    } else {
+        Ok(lhs / rhs)
+    }
 }
 
 #[cfg(test)]
@@ -39,12 +45,11 @@ mod tests {
     #[test]
     fn test_divide() {
         let result = divide(10, 2);
-        assert_eq!(result, 5);
+        assert_eq!(result, Ok(5));
     }
 
     #[test]
     fn test_divide_by_zero() {
-        let result = std::panic::catch_unwind(|| divide(10, 0));
-        assert!(result.is_err());
+        assert_eq!(divide(10, 0), Err(MathError::DivisionByZero));
     }
 }
