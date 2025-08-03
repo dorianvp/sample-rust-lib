@@ -24,5 +24,3 @@ about your integer overflows and division by zero!
 
 - The interesting stuff lives under the `SafeCalculator` and `SafeMultiply` classes.
 - Also check out the tests for an example of usage.
-- You can also check out the Android tests.
-- The gradle files are mostly boilerplate, but there are a few things in there needed for building the Rust library. That took a while to figure out, and I currently believe this is the easiest approach.
