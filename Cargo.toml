@@ -1,7 +1,4 @@
 [workspace]
 
-members = ["foobar", "uniffi-bindgen"]
+members = ["crates/*"]
 resolver = "2"
-
-[workspace.dependencies]
-uniffi = "0.29.4"

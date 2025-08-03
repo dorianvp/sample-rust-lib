@@ -1,11 +1,7 @@
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-// You must call this once
-uniffi::setup_scaffolding!();
 
-// What follows is an intentionally ridiculous whirlwind tour of how you'd expose a complex API to UniFFI.
-
-#[derive(Debug, PartialEq, uniffi::Enum)]
+#[derive(Debug, PartialEq)]
 pub enum ComputationState {
     /// Initial state with no value computed
     Init,
@@ -14,13 +10,13 @@ pub enum ComputationState {
     },
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, uniffi::Record)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct ComputationResult {
     pub value: i64,
     pub computation_time: Duration,
 }
 
-#[derive(Debug, PartialEq, thiserror::Error, uniffi::Error)]
+#[derive(Debug, PartialEq, thiserror::Error)]
 pub enum ComputationError {
     #[error("Division by zero is not allowed.")]
     DivisionByZero,
@@ -31,7 +27,6 @@ pub enum ComputationError {
 }
 
 /// A binary operator that performs some mathematical operation with two numbers.
-#[uniffi::export(with_foreign)]
 pub trait BinaryOperator: Send + Sync {
     fn perform(&self, lhs: i64, rhs: i64) -> Result<i64, ComputationError>;
 }
@@ -39,14 +34,12 @@ pub trait BinaryOperator: Send + Sync {
 /// A somewhat silly demonstration of functional core/imperative shell in the form of a calculator with arbitrary operators.
 ///
 /// Operations return a new calculator with updated internal state reflecting the computation.
-#[derive(PartialEq, Debug, uniffi::Object)]
+#[derive(PartialEq, Debug)]
 pub struct Calculator {
     state: ComputationState,
 }
 
-#[uniffi::export]
 impl Calculator {
-    #[uniffi::constructor]
     pub fn new() -> Self {
         Self {
             state: ComputationState::Init,
@@ -106,38 +99,29 @@ impl Calculator {
     }
 }
 
-#[derive(uniffi::Object)]
 struct SafeAddition {}
 
-// Makes it easy to construct from foreign code
-#[uniffi::export]
 impl SafeAddition {
-    #[uniffi::constructor]
     fn new() -> Self {
         SafeAddition {}
     }
 }
 
-#[uniffi::export]
 impl BinaryOperator for SafeAddition {
     fn perform(&self, lhs: i64, rhs: i64) -> Result<i64, ComputationError> {
         lhs.checked_add(rhs).ok_or(ComputationError::Overflow)
     }
 }
 
-#[derive(uniffi::Object)]
 struct SafeDivision {}
 
 // Makes it easy to construct from foreign code
-#[uniffi::export]
 impl SafeDivision {
-    #[uniffi::constructor]
     fn new() -> Self {
         SafeDivision {}
     }
 }
 
-#[uniffi::export]
 impl BinaryOperator for SafeDivision {
     fn perform(&self, lhs: i64, rhs: i64) -> Result<i64, ComputationError> {
         if rhs == 0 {
@@ -152,12 +136,10 @@ impl BinaryOperator for SafeDivision {
 // stated in the glue code. It's easy to extend classes in Swift, but you can't just declare a conformance in Kotlin.
 // So, to keep things easy, we just do this as a compromise.
 
-#[uniffi::export]
 fn safe_addition_operator() -> Arc<dyn BinaryOperator> {
     Arc::new(SafeAddition::new())
 }
 
-#[uniffi::export]
 fn safe_division_operator() -> Arc<dyn BinaryOperator> {
     Arc::new(SafeDivision::new())
 }
